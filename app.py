@@ -1,35 +1,26 @@
-from flask import Flask, request
+from flask import Flask, render_template, request
+import requests
 
 app = Flask(__name__)
+API_KEY = "82c49aa211d8c8177b647b1eaa26b300" # Cole a chave obtida no site OpenWeatherMap
 
-@app.route("/perfil/<nome>")
-def mostrar_perfil(nome):
-    return f"<h1>Perfil de: {nome}</h1>"
-
-@app.route("/produto/<int:id_produto>")
-def exibir_produto(id_produto):
-    return f"<h1>Buscando o produto ID: {id_produto}</h1>"
-
-@app.route("/buscar")
-def buscar_produto():
-
-    palavra_chave = request.args.get("termo")
-
-    if palavra_chave:
-        return f"Sua busca: {palavra_chave}"
-    else:
-        return "Digite um termo na URL"
-
-@app.route("/api/usuario/<int:id>")
-def api_usuario(id):
-
-    dados = {
-        "id": id,
-        "nome":  "Usuario_MOCK",
-        "vip": True
-    }
-
-    return dados
+@app.route("/", methods=["GET", "POST"])
+def index():
+    clima = None
+    erro = None
+    if request.method == "POST":
+        cidade = request.form.get("cidade")
+        if cidade:
+            url = f"https://api.openweathermap.org/data/2.5/weather?q={cidade}&appid={API_KEY}&units=metric&lang=pt_br"
+            try:
+                resposta = requests.get(url)
+                if resposta.status_code == 200:
+                    clima = resposta.json()
+                else:
+                    erro = "Cidade não encontrada! Tente novamente."
+            except requests.exceptions.RequestException:
+                erro = "Não foi possível conectar ao servidor de clima."
+    return render_template("index.html", clima=clima, erro=erro)
 
 if __name__ == "__main__":
     app.run(debug=True)
