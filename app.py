@@ -2,7 +2,7 @@ from flask import Flask, render_template, request
 import requests
 
 app = Flask(__name__)
-# Sua chave já tá configurada aqui
+
 API_KEY = "82c49aa211d8c8177b647b1eaa26b300" 
 
 @app.route("/", methods=["GET", "POST"])
